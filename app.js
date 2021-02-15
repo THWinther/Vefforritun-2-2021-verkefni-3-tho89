@@ -1,9 +1,10 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import { body, validationResult } from 'express-validator';
+import { body, check, validationResult } from 'express-validator';
 import pg from 'pg';
 import dotenv from 'dotenv';
 import path from 'path';
+import sanitize from 'sanitize';
 
 dotenv.config();
 
@@ -25,15 +26,21 @@ const linkName = `${hostname}:${port}`;
 
 app.locals.signature = [];
 
-app.get('/', async (req, res) => {
+app.get('/page:id', async (req, res) => {
   try {
     const laug = new pg.Pool({
       connectionString: process.env.DATABASE_URL,
       /*ssl: { rejectUnauthorized: false },*/
     });
 
+    if(Number.isInteger(req.params.id)) return res.redirect('/page1');
+    console.log(Math.floor(req.params.id));
+
+    let page = [50*(Math.floor(req.params.id)-1)];
+    if(page[0]<0) page[0] = 0;
+
     const client = await laug.connect();
-    const result = await client.query('SELECT signatures.date, signatures.ssn, signatures.name, signatures.comment, signatures.list FROM signatures ORDER BY id OFFSET 0 LIMIT 10;');
+    const result = await client.query('SELECT signatures.date, signatures.ssn, signatures.name, signatures.comment, signatures.list FROM signatures ORDER BY id OFFSET $1 LIMIT 50;',page);
     client.release();
     await laug.end();
     app.locals.signature = result.rows;
@@ -45,6 +52,8 @@ app.get('/', async (req, res) => {
     return res.render('index');
   }
 });
+
+app.get('/', (req,res)=>{return res.redirect('/page1')});
 
 app.post(
   '/submit-Signature',
