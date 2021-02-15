@@ -33,7 +33,7 @@ app.get('/', async (req, res) => {
     });
 
     const client = await laug.connect();
-    const result = await client.query('SELECT signatures.date, signatures.ssn, signatures.name, signatures.comment, signatures.list FROM signatures');
+    const result = await client.query('SELECT signatures.date, signatures.ssn, signatures.name, signatures.comment, signatures.list FROM signatures ORDER BY id OFFSET 0 LIMIT 10;');
     client.release();
     await laug.end();
     app.locals.signature = result.rows;
