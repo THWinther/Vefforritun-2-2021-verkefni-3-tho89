@@ -1,10 +1,9 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import { body, check, validationResult } from 'express-validator';
+import { body, validationResult } from 'express-validator';
 import pg from 'pg';
 import dotenv from 'dotenv';
 import path from 'path';
-import sanitize from 'sanitize';
 
 dotenv.config();
 
@@ -36,7 +35,7 @@ app.get('/page:id', async (req, res) => {
     let pageNr = 0;
 
     try {
-      pageNr = Number.parseInt(req.params.id);
+      pageNr = Number.parseInt(req.params.id, 10);
     } catch (e) {
       app.locals.error = 'invalid pageNr';
       return res.render('index', {
@@ -60,7 +59,7 @@ app.get('/page:id', async (req, res) => {
     console.error(e);
     app.locals.error = 'parse error';
     return res.render('index', {
-      pageNr,
+      pageNr: 0,
     });
   }
 });
@@ -84,19 +83,13 @@ app.post(
     .matches(new RegExp(nationalIdPattern))
     .withMessage('Kennitala verður að vera á formi 000000-0000 eða 0000000000'),
   (req, res, next) => {
-    const {
-      name = '',
-      ssn = '',
-      comment = '',
-    } = req.body;
-
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
       const errorMessages = errors.array().map((i) => i.msg);
       console.log(errorMessages);
       app.locals.error = errorMessages[0];
-      return res.render('index', { pageNr });
+      return res.render('index', { pageNr: 0 });
     }
 
     return next();

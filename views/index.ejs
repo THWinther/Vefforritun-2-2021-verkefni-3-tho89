@@ -15,7 +15,7 @@
     <br>
     <input type="submit" id="submit" value="Skrifa Undir">
 </form>
-<p><%=error%></p>
+<p><%=error[0]%></p>
 <h1>Undirskriftir</h1>
 
 <table>
@@ -38,8 +38,9 @@
         
     </tr>
     <% }); %>
-
-    <a href="/page<%=pageNr-1%>">Seinni síða</a>
-    <a href="/page<%=pageNr+1%>">Næsta síða</a>
+  
 
 </table>
+
+<a href="/page<%=pageNr-1%>">Seinni síða</a>
+<a href="/page<%=pageNr+1%>">Næsta síða</a>
