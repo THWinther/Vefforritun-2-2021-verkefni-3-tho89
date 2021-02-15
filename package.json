@@ -1,0 +1,39 @@
+{
+  "name": "vefforitun-2-2012-verkefni-2-tho89",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "test": "npx eslint app.js",
+    "start": "node app.js",
+    "setup": "node setup.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "dotenv": "^8.2.0",
+    "ejs": "^3.1.5",
+    "express": "^4.17.1",
+    "express-ejs-layouts": "^2.5.0",
+    "express-validator": "^6.9.2",
+    "fs": "0.0.1-security",
+    "path": "^0.12.7",
+    "pg": "^8.5.1",
+    "sass": "^1.32.4"
+  },
+  "devDependencies": {
+    "ejs-lint": "^1.1.0",
+    "eslint": "^7.18.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1",
+    "nodemon": "^2.0.7",
+    "stylelint": "^13.8.0",
+    "stylelint-config-recommended": "^3.0.0",
+    "stylelint-config-sass-guidelines": "^7.1.0",
+    "stylelint-config-standard": "^20.0.0",
+    "stylelint-csstree-validator": "^1.9.0",
+    "stylelint-scss": "^3.18.0"
+  }
+}

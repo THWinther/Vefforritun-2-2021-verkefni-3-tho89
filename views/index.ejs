@@ -1,0 +1,41 @@
+<h1>Undirskriftalisti</h1>
+<form method="POST" action="/submit-Signature">
+
+    <label for="name" >Nafn*</label>
+    <input type="text" id="name" name="name" maxlength="63" required>
+    <br>
+    <label for="ssn" >SSN*</label>
+    <input type="text" id="ssn" name="ssn" placeholder="000000-0000" required>
+    <br>
+    <label for="comment">Athugasemd:</label>
+    <input type="textarea" id="comment" name="comment" maxlength="1023">
+    <br>
+    <label for="list" >Ekki Birta nafn á lista</label>
+    <input type="checkbox" id="list" name="list">   
+    <br>
+    <input type="submit" id="submit" value="Skrifa Undir">
+</form>
+<p><%=error%></p>
+<h1>Undirskriftir</h1>
+
+<table>
+    <tr>
+        <th><b>Dags</b></th>
+        <th><b>Nafn</b></th>
+        <th><b>Athugasemd</b></th>
+    </tr>
+    <% signature.forEach((el ,i) =>{%> 
+    <tr>
+        <td> <%=signature[i].date.toString().substring(0,15)%></td>
+        
+        <% if(signature[i].list===''){ %>
+            <td><%=signature[i].name%></td>
+          <% } else{ %>  
+            <td>Anonymous</td>
+         <% } %>
+
+        <td> <%=signature[i].comment%></td>       
+        
+    </tr>
+    <% }); %>
+</table>
