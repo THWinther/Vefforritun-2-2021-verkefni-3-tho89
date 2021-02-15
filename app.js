@@ -30,30 +30,42 @@ app.get('/page:id', async (req, res) => {
   try {
     const laug = new pg.Pool({
       connectionString: process.env.DATABASE_URL,
-      /*ssl: { rejectUnauthorized: false },*/
+      /* ssl: { rejectUnauthorized: false }, */
     });
 
-    if(Number.isInteger(req.params.id)) return res.redirect('/page1');
-    console.log(Math.floor(req.params.id));
+    let pageNr = 0;
 
-    let page = [50*(Math.floor(req.params.id)-1)];
-    if(page[0]<0) page[0] = 0;
+    try {
+      pageNr = Number.parseInt(req.params.id);
+    } catch (e) {
+      app.locals.error = 'invalid pageNr';
+      return res.render('index', {
+        pageNr: 0,
+      });
+    }
+
+    const page = [50 * (Math.floor(req.params.id) - 1)];
+    if (page[0] < 0) page[0] = 0;
 
     const client = await laug.connect();
-    const result = await client.query('SELECT signatures.date, signatures.ssn, signatures.name, signatures.comment, signatures.list FROM signatures ORDER BY id OFFSET $1 LIMIT 50;',page);
+    const result = await client.query('SELECT signatures.date, signatures.ssn, signatures.name, signatures.comment, signatures.list FROM signatures ORDER BY id OFFSET $1 LIMIT 50;', page);
     client.release();
     await laug.end();
     app.locals.signature = result.rows;
     app.locals.error = '';
-    return res.render('index');
+    return res.render('index', {
+      pageNr,
+    });
   } catch (e) {
     console.error(e);
     app.locals.error = 'parse error';
-    return res.render('index');
+    return res.render('index', {
+      pageNr,
+    });
   }
 });
 
-app.get('/', (req,res)=>{return res.redirect('/page1')});
+app.get('/', (req, res) => res.redirect('/page1'));
 
 app.post(
   '/submit-Signature',
@@ -84,7 +96,7 @@ app.post(
       const errorMessages = errors.array().map((i) => i.msg);
       console.log(errorMessages);
       app.locals.error = errorMessages[0];
-      return res.render('index');
+      return res.render('index', { pageNr });
     }
 
     return next();
@@ -114,7 +126,7 @@ app.post(
     try {
       const laug = new pg.Pool({
         connectionString: process.env.DATABASE_URL,
-        /*ssl: { rejectUnauthorized: false },*/
+        /* ssl: { rejectUnauthorized: false }, */
       });
 
       const signature = [name, ssn, comment, list];
