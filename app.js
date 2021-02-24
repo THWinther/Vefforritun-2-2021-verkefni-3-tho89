@@ -16,7 +16,6 @@ const app = express();
 
 app.locals.importantize = (str) => (`${str}!`);
 
-
 const sessionSecret = 'leyndarmál';
 app.use(express.urlencoded({ extended: true }));
 
@@ -30,31 +29,28 @@ app.use(session({
   maxAge: 20 * 1000, // 20 sek
 }));
 
-
 async function strat(username, password, done) {
   try {
-
     const laug = new pg.Pool({
       connectionString: process.env.DATABASE_URL,
       /* ssl: { rejectUnauthorized: false }, */
-      });
-      const client = await laug.connect();
-      const user = await (await client.query('SELECT users.id, users.username, users.password FROM users;')).rows[0];
-      console.log(user); 
+    });
+    const client = await laug.connect();
+    const user = await (await client.query('SELECT users.id, users.username, users.password FROM users;')).rows[0];
+    console.log(user);
 
     if (!user) {
       return done(null, false);
     }
 
     // Verður annað hvort notanda hlutur ef lykilorð rétt, eða false
-    if(password === user.password){return done(null, user);}
-    else{return done(null, false);}
+    if (password === user.password) { return done(null, user); }
+    return done(null, false);
   } catch (err) {
     console.error(err);
     return done(err);
   }
 }
-
 
 passport.use(new Strategy(strat));
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -64,15 +60,14 @@ passport.serializeUser((user, done) => {
   done(null, user.id);
 });
 
-
 passport.deserializeUser(async (id, done) => {
   try {
     const laug = new pg.Pool({
       connectionString: process.env.DATABASE_URL,
       /* ssl: { rejectUnauthorized: false }, */
-      });
+    });
     const client = await laug.connect();
-    const user = await (await client.query('SELECT users.id, users.username, users.password FROM users WHERE users.id=$1;',[id])).rows;
+    const user = await (await client.query('SELECT users.id, users.username, users.password FROM users WHERE users.id=$1;', [id])).rows;
     done(null, user);
   } catch (err) {
     done(err);
@@ -90,21 +85,14 @@ app.use((req, res, next) => {
   next();
 });
 
-function ensureLoggedIn(req, res, next) {
-  if (req.isAuthenticated()) {
-    next();
-  }
-  return res.send('<p>Log in nerd</p>');
-}
-
 const hostname = process.env.HOST;
 const port = process.env.PORT;
 const linkName = `${hostname}:${port}`;
 
 app.locals.signature = [];
 
-app.get('/login', (req,res)=>{
-  if(req.isAuthenticated())res.redirect('/');
+app.get('/login', (req, res) => {
+  if (req.isAuthenticated())res.redirect('/');
   res.render('login');
 });
 
@@ -118,45 +106,44 @@ app.post(
   }),
 
   // Ef við komumst hingað var notandi skráður inn, senda á /admin
-  (req, res) => {
-    return res.redirect('/admin');
-  },
+  (req, res) => res.redirect('/admin'),
 );
 
-app.get('/logout', (req,res)=>{
+app.get('/logout', (req, res) => {
   req.logout();
   app.locals.admin = false;
   return res.redirect('/');
 });
 
 app.get('/admin', (req, res) => {
-  if(!req.isAuthenticated())return res.redirect('/login');
+  if (!req.isAuthenticated()) return res.redirect('/login');
   app.locals.admin = true;
-  res.redirect('/');
+  return res.redirect('/');
 });
 
-app.post('/delete:id', async (req, res )=>{
+app.post('/delete:id', async (req, res) => {
   try {
-    if(!req.isAuthenticated())return res.redirect('/login');
+    if (!req.isAuthenticated()) return res.redirect('/login');
     const laug = new pg.Pool({
       connectionString: process.env.DATABASE_URL,
       /* ssl: { rejectUnauthorized: false }, */
     });
-    var id = Number.parseInt(req.params.id, 10);
+    const id = Number.parseInt(req.params.id, 10);
     const client = await laug.connect();
     const result = await client.query('DELETE FROM signatures WHERE signatures.id=$1', [id]);
-    console.log(id);
+    console.log(result);
     client.release();
     await laug.end();
-
-  }catch(e){}
+  } catch (e) {
+    console.error(e);
+  }
 
   return res.redirect('/');
 });
 
 app.get('/page:id', async (req, res) => {
-  if(req.isAuthenticated()) app.locals.admin = true;
-  else  app.locals.admin = false;
+  if (req.isAuthenticated()) app.locals.admin = true;
+  else app.locals.admin = false;
   try {
     const laug = new pg.Pool({
       connectionString: process.env.DATABASE_URL,
@@ -195,12 +182,8 @@ app.get('/page:id', async (req, res) => {
   }
 });
 
-
-
 app.get('/', async (req, res) => {
-  
   res.redirect('/page1');
-
 });
 
 app.post(
@@ -224,8 +207,8 @@ app.post(
 
     if (!errors.isEmpty()) {
       const errorMessages = errors.array().map((i) => i.msg);
-      console.log(errorMessages);
-      app.locals.error = errorMessages[0];
+      const [err] = errorMessages;
+      app.locals.error = err;
       return res.render('index', { pageNr: 0 });
     }
 
