@@ -25,6 +25,8 @@ const linkName = `${hostname}:${port}`;
 
 app.locals.signature = [];
 
+app.get('/admin', (req, res) => res.redirect('/'));
+
 app.get('/page:id', async (req, res) => {
   try {
     const laug = new pg.Pool({
