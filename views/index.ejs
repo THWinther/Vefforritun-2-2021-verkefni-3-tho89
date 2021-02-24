@@ -41,7 +41,13 @@
          <% } %>
 
         <td> <%=signature[i].comment%></td>       
-        <% if(admin==true){%><td><button>Eyða</button></td> <%}%> 
+        <% if(admin==true){%>
+            <td>
+                <form action="/delete<%=signature[i].id%>" method="post">
+                    <input type="submit" name="upvote" value="Upvote" />
+                </form>
+            </td>  
+        <%}%> 
     </tr>
     <% }); %>
   

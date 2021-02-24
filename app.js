@@ -119,24 +119,39 @@ app.post(
 
   // Ef við komumst hingað var notandi skráður inn, senda á /admin
   (req, res) => {
-    res.redirect('/admin');
+    return res.redirect('/admin');
   },
 );
 
 app.get('/logout', (req,res)=>{
   req.logout();
   app.locals.admin = false;
-  res.redirect('/');
+  return res.redirect('/');
 });
 
 app.get('/admin', (req, res) => {
-  if(!req.isAuthenticated())res.redirect('/login');
+  if(!req.isAuthenticated())return res.redirect('/login');
   app.locals.admin = true;
   res.redirect('/');
 });
 
-app.get('/delete/:id', async (req, res )=>{
-  res.redirect('/');
+app.post('/delete:id', async (req, res )=>{
+  try {
+    if(!req.isAuthenticated())return res.redirect('/login');
+    const laug = new pg.Pool({
+      connectionString: process.env.DATABASE_URL,
+      /* ssl: { rejectUnauthorized: false }, */
+    });
+    var id = Number.parseInt(req.params.id, 10);
+    const client = await laug.connect();
+    const result = await client.query('DELETE FROM signatures WHERE signatures.id=$1', [id]);
+    console.log(id);
+    client.release();
+    await laug.end();
+
+  }catch(e){}
+
+  return res.redirect('/');
 });
 
 app.get('/page:id', async (req, res) => {
@@ -163,7 +178,7 @@ app.get('/page:id', async (req, res) => {
     if (page[0] < 0) page[0] = 0;
 
     const client = await laug.connect();
-    const result = await client.query('SELECT signatures.date, signatures.ssn, signatures.name, signatures.comment, signatures.list FROM signatures ORDER BY id OFFSET $1 LIMIT 50;', page);
+    const result = await client.query('SELECT signatures.date, signatures.ssn, signatures.name, signatures.comment, signatures.list, signatures.id FROM signatures ORDER BY id OFFSET $1 LIMIT 50;', page);
     client.release();
     await laug.end();
     app.locals.signature = result.rows;
