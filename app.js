@@ -39,7 +39,7 @@ async function strat(username, password, done) {
       /* ssl: { rejectUnauthorized: false }, */
       });
       const client = await laug.connect();
-      const user = await (await client.query('SELECT users.id, users.username, users.password FROM users;')).rows;
+      const user = await (await client.query('SELECT users.id, users.username, users.password FROM users;')).rows[0];
       console.log(user); 
 
     if (!user) {
@@ -67,8 +67,12 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser(async (id, done) => {
   try {
+    const laug = new pg.Pool({
+      connectionString: process.env.DATABASE_URL,
+      /* ssl: { rejectUnauthorized: false }, */
+      });
     const client = await laug.connect();
-    const user = await (await client.query('SELECT users.id, users.username, users.password FROM users WHERE users.id=$1;',id)).rows;
+    const user = await (await client.query('SELECT users.id, users.username, users.password FROM users WHERE users.id=$1;',[id])).rows;
     done(null, user);
   } catch (err) {
     done(err);
@@ -99,9 +103,39 @@ const linkName = `${hostname}:${port}`;
 
 app.locals.signature = [];
 
-app.get('/admin', (req, res) => res.redirect('/'));
+app.get('/login', (req,res)=>{
+  if(req.isAuthenticated())res.redirect('/');
+  res.render('login');
+});
 
-app.get('/delete/:id', ensureLoggedIn, async (req, res )=>{
+app.post(
+  '/login',
+
+  // Þetta notar strat að ofan til að skrá notanda inn
+  passport.authenticate('local', {
+    failureMessage: 'Notandanafn eða lykilorð vitlaust.',
+    failureRedirect: '/login',
+  }),
+
+  // Ef við komumst hingað var notandi skráður inn, senda á /admin
+  (req, res) => {
+    res.redirect('/admin');
+  },
+);
+
+app.get('/logout', (req,res)=>{
+  req.logout();
+  app.locals.admin = false;
+  res.redirect('/');
+});
+
+app.get('/admin', (req, res) => {
+  if(!req.isAuthenticated())res.redirect('/login');
+  app.locals.admin = true;
+  res.redirect('/');
+});
+
+app.get('/delete/:id', async (req, res )=>{
   res.redirect('/');
 });
 
