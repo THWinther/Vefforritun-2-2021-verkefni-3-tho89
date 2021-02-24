@@ -140,6 +140,8 @@ app.get('/delete/:id', async (req, res )=>{
 });
 
 app.get('/page:id', async (req, res) => {
+  if(req.isAuthenticated()) app.locals.admin = true;
+  else  app.locals.admin = false;
   try {
     const laug = new pg.Pool({
       connectionString: process.env.DATABASE_URL,
