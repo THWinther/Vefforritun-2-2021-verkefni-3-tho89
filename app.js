@@ -33,7 +33,7 @@ async function strat(username, password, done) {
   try {
     const laug = new pg.Pool({
       connectionString: process.env.DATABASE_URL,
-      /* ssl: { rejectUnauthorized: false }, */
+      ssl: { rejectUnauthorized: false },
     });
     const client = await laug.connect();
     const user = await (await client.query('SELECT users.id, users.username, users.password FROM users;')).rows[0];
@@ -64,7 +64,7 @@ passport.deserializeUser(async (id, done) => {
   try {
     const laug = new pg.Pool({
       connectionString: process.env.DATABASE_URL,
-      /* ssl: { rejectUnauthorized: false }, */
+      ssl: { rejectUnauthorized: false },
     });
     const client = await laug.connect();
     const user = await (await client.query('SELECT users.id, users.username, users.password FROM users WHERE users.id=$1;', [id])).rows;
@@ -126,7 +126,7 @@ app.post('/delete:id', async (req, res) => {
     if (!req.isAuthenticated()) return res.redirect('/login');
     const laug = new pg.Pool({
       connectionString: process.env.DATABASE_URL,
-      /* ssl: { rejectUnauthorized: false }, */
+      ssl: { rejectUnauthorized: false },
     });
     const id = Number.parseInt(req.params.id, 10);
     const client = await laug.connect();
@@ -147,7 +147,7 @@ app.get('/page:id', async (req, res) => {
   try {
     const laug = new pg.Pool({
       connectionString: process.env.DATABASE_URL,
-      /* ssl: { rejectUnauthorized: false }, */
+      ssl: { rejectUnauthorized: false },
     });
 
     let pageNr = 0;
@@ -239,7 +239,7 @@ app.post(
     try {
       const laug = new pg.Pool({
         connectionString: process.env.DATABASE_URL,
-        /* ssl: { rejectUnauthorized: false }, */
+        ssl: { rejectUnauthorized: false },
       });
 
       const signature = [name, ssn, comment, list];
