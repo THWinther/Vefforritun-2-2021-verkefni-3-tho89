@@ -88,10 +88,9 @@ app.use((req, res, next) => {
 
 function ensureLoggedIn(req, res, next) {
   if (req.isAuthenticated()) {
-    return next();
+    next();
   }
-
-  return res.redirect('/admin');
+  return res.send('<p>Log in nerd</p>');
 }
 
 const hostname = process.env.HOST;
@@ -102,8 +101,8 @@ app.locals.signature = [];
 
 app.get('/admin', (req, res) => res.redirect('/'));
 
-app.post('delete:id', async (req, res )=>{
-
+app.get('/delete/:id', ensureLoggedIn, async (req, res )=>{
+  res.redirect('/');
 });
 
 app.get('/page:id', async (req, res) => {
