@@ -4,6 +4,9 @@ import { body, validationResult } from 'express-validator';
 import pg from 'pg';
 import dotenv from 'dotenv';
 import path from 'path';
+import session from 'express-session';
+import { Strategy } from 'passport-local';
+import passport from 'passport';
 
 dotenv.config();
 
@@ -13,11 +16,83 @@ const app = express();
 
 app.locals.importantize = (str) => (`${str}!`);
 
+
+const sessionSecret = 'leyndarmál';
+app.use(express.urlencoded({ extended: true }));
+
 app.set('views', path.join(path.dirname(''), '/views'));
 app.set('view engine', 'ejs');
 
+app.use(session({
+  secret: sessionSecret,
+  resave: false,
+  saveUninitialized: false,
+  maxAge: 20 * 1000, // 20 sek
+}));
+
+
+async function strat(username, password, done) {
+  try {
+
+    const laug = new pg.Pool({
+      connectionString: process.env.DATABASE_URL,
+      /* ssl: { rejectUnauthorized: false }, */
+      });
+      const client = await laug.connect();
+      const user = await (await client.query('SELECT users.id, users.username, users.password FROM users;')).rows;
+      console.log(user); 
+
+    if (!user) {
+      return done(null, false);
+    }
+
+    // Verður annað hvort notanda hlutur ef lykilorð rétt, eða false
+    if(password === user.password){return done(null, user);}
+    else{return done(null, false);}
+  } catch (err) {
+    console.error(err);
+    return done(err);
+  }
+}
+
+
+passport.use(new Strategy(strat));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
+
+passport.deserializeUser(async (id, done) => {
+  try {
+    const client = await laug.connect();
+    const user = await (await client.query('SELECT users.id, users.username, users.password FROM users WHERE users.id=$1;',id)).rows;
+    done(null, user);
+  } catch (err) {
+    done(err);
+  }
+});
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use((req, res, next) => {
+  if (req.isAuthenticated()) {
+    res.locals.user = req.user;
+  }
+
+  next();
+});
+
+function ensureLoggedIn(req, res, next) {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+
+  return res.redirect('/admin');
+}
 
 const hostname = process.env.HOST;
 const port = process.env.PORT;
@@ -26,6 +101,10 @@ const linkName = `${hostname}:${port}`;
 app.locals.signature = [];
 
 app.get('/admin', (req, res) => res.redirect('/'));
+
+app.post('delete:id', async (req, res )=>{
+
+});
 
 app.get('/page:id', async (req, res) => {
   try {
@@ -66,7 +145,13 @@ app.get('/page:id', async (req, res) => {
   }
 });
 
-app.get('/', (req, res) => res.redirect('/page1'));
+
+
+app.get('/', async (req, res) => {
+  
+  res.redirect('/page1');
+
+});
 
 app.post(
   '/submit-Signature',

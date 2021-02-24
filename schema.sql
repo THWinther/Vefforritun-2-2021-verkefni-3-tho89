@@ -4,8 +4,7 @@ DROP TABLE IF EXISTS users;
 CREATE TABLE IF NOT EXISTS users(
   id serial primary key,
   username varchar(128),
-  password varchar(128),
-  admin int default 0
+  password varchar(128)
 );
 
 CREATE TABLE IF NOT EXISTS signatures(
@@ -17,4 +16,4 @@ CREATE TABLE IF NOT EXISTS signatures(
   date timestamp with time zone not null default current_timestamp
 );
 
-INSERT INTO users(username,password,admin)  VALUES ('Admin','Admin',1);
+INSERT INTO users(username,password)  VALUES ('Admin','Admin');
