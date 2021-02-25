@@ -15,5 +15,3 @@ CREATE TABLE IF NOT EXISTS signatures(
   list text not null,
   date timestamp with time zone not null default current_timestamp
 );
-
-INSERT INTO users(username,password)  VALUES ('Admin','Admin');

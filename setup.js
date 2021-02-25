@@ -2,20 +2,32 @@ import pg from 'pg';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import faker from 'faker';
+import bcrypt from 'bcrypt';
 dotenv.config('../');
+
 
 async function setup() {
   try {
     const query = fs.readFileSync('schema.sql').toString();
     const laug = new pg.Pool({
       connectionString: process.env.DATABASE_URL,
-      ssl: { rejectUnauthorized: false },
+      /*ssl: { rejectUnauthorized: false },*/
     });
 
     const client = await laug.connect();
     let res = await client.query(query);
     console.log(res);
+    var saltRounds = 10;
+    var password= 'Admin';
+    bcrypt.hash(password, saltRounds, function(err, hash) {
+      client.query("INSERT INTO users(username,password)  VALUES ('Admin',$1);",[hash]);
+      console.log(hash);
+    });
 
+    
+
+
+    
     const setupQuery = "INSERT INTO signatures(name,ssn,comment,list) VALUES($1,$2,$3,$4);";
     for(let i=0;i<500;i++){
 
