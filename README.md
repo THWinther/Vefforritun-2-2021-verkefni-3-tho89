@@ -3,8 +3,11 @@
 Stilla .env skjal á frominu
 
 HOST="127.0.0.1"
+
 PORT=3000
+
 DATABASE_URL=
+
 NODE_ENV = 'development'
 
 keyra npm run setup til að stilla heroku
