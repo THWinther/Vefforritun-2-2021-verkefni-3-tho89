@@ -11,7 +11,7 @@ async function setup() {
     const query = fs.readFileSync('schema.sql').toString();
     const laug = new pg.Pool({
       connectionString: process.env.DATABASE_URL,
-      ssl: { rejectUnauthorized: false },
+      /*ssl: { rejectUnauthorized: false },*/
     });
 
     const client = await laug.connect();
