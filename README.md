@@ -10,7 +10,7 @@ DATABASE_URL=
 
 NODE_ENV = 'development'
 
-keyra npm run setup til að stilla heroku
+keyra npm run setup til að stilla postgres sql
 
 npm run start keyrir síðuna
 
